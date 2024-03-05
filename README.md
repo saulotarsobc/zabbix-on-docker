@@ -3,7 +3,9 @@
 ## Use
 
 ```sh
-git clone 
+git clone https://github.com/saulotarsobc/zabbix-on-docker.git;
+cd zabbix-on-docker;
+docker compose up -d;
 ```
 
 ## Help
