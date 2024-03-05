@@ -1,5 +1,7 @@
 # Zabbix on Docker
 
+![alt text](./images/image.png)
+
 ## Use
 
 ```sh
