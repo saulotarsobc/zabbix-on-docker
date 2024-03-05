@@ -65,7 +65,6 @@ services:
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
       MYSQL_PASSWORD: J626CzObYr5o
-    # command: --character-set-server=utf8 --collation-server=utf8_bin --default-authentication-plugin=mysql_native_password
     command: --character-set-server=utf8 --collation-server=utf8_bin --default-authentication-plugin=caching_sha2_password
     restart: always
     ports:
