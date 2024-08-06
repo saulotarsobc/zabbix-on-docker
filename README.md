@@ -3,21 +3,8 @@
 ![alt text](./images/image.png)
 
 ## Intallation
-```ps1
-# Check
-$PSVersionTable.PSVersion
-Get-Module -Name AzureRM -ListAvailable
-Get-ExecutionPolicy -List
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# Install
-Install-Module -Name Az -Repository PSGallery -Force
-
-# Update
-Update-Module -Name Az -Force
-
-# Login
-Connect-AzAccount
+```sh
+az ad sp create-for-rbac --name "Any Name" --role reader --scope /subscriptions/{{subscription_id}};
 ```
 
 ## Use
