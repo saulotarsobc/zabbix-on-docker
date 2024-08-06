@@ -2,6 +2,24 @@
 
 ![alt text](./images/image.png)
 
+## Intallation
+```ps1
+# Check
+$PSVersionTable.PSVersion
+Get-Module -Name AzureRM -ListAvailable
+Get-ExecutionPolicy -List
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Install
+Install-Module -Name Az -Repository PSGallery -Force
+
+# Update
+Update-Module -Name Az -Force
+
+# Login
+Connect-AzAccount
+```
+
 ## Use
 
 ```sh
@@ -16,6 +34,7 @@ docker compose up -d;
 
 - [Zabbix Series: 02- Instalación Zabbix usando Docker](https://youtu.be/kD8FHo-OUbQ)
 - [Instalação do Zabbix no Docker / instalação e configuração do Agent Zabbix](https://youtu.be/WHwaapu8ntI)
+- [Instalar o Azure PowerShell no Windows](https://learn.microsoft.com/pt-br/powershell/azure/install-azps-linux?view=azps-12.1.0)
 
 ## [zabbix/zabbix-web-apache-mysql](https://hub.docker.com/r/zabbix/zabbix-web-apache-mysql)
 
