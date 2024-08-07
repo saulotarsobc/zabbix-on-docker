@@ -1,0 +1,2 @@
+#! bash
+docker compose down;
