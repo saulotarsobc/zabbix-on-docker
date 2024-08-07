@@ -4,7 +4,7 @@ docker network create -d bridge zabbix;
 docker run -d --name zabbix-mysql \
     --restart always \
     -p 3306:3306 \
-    -v ./docker/zabbix/mysql/data:/var/lib/mysql \
+    -v ./data/mysql/data:/var/lib/mysql \
     -e MYSQL_ROOT_PASSWORD=secret \
     -e MYSQL_DATABASE=zabbix \
     -e MYSQL_USER=zabbix \
@@ -12,14 +12,14 @@ docker run -d --name zabbix-mysql \
     --network=zabbix \
     mysql:8 \
     --character-set-server=utf8mb4 \
-    --collation-server=utf8mb4_bin
+    --collation-server=utf8mb4_bin;
 
 # Agora instalaremos o conteiner docker Zabbix SNMP Trap.
 docker run -d --name zabbix-snmptraps -t \
     --restart always \
     -p 162:1162/udp \
-    -v ./docker/zabbix/snmptraps:/var/lib/zabbix/snmptraps:rw \
-    -v ./docker/zabbix/mibs:/usr/share/snmp/mibs:ro \
+    -v ./data/snmptraps:/var/lib/zabbix/snmptraps:rw \
+    -v ./data/mibs:/usr/share/snmp/mibs:ro \
     --network=zabbix \
     zabbix/zabbix-snmptraps;
 

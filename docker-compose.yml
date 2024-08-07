@@ -29,7 +29,8 @@ services:
       - zabbix
 
   server:
-    image: zabbix/zabbix-server-mysql
+    build:
+      context: ./Dockerfiles/zabbix-server
     container_name: zabbix-server
     restart: always
     ports:
@@ -49,7 +50,8 @@ services:
       - zabbix-mibs-data:/usr/share/snmp/mibs:ro
 
   web:
-    image: zabbix/zabbix-web-nginx-mysql
+    build:
+      context: ./Dockerfiles/zabbix-web
     container_name: zabbix-web
     restart: always
     ports:
@@ -67,10 +69,13 @@ services:
       - zabbix
 
   agent:
-    image: zabbix/zabbix-agent
+    build: 
+      context: ./Dockerfiles/zabbix-agent
     container_name: zabbix-agent
     restart: always
     privileged: true
+    ports:
+      - "10050:10050"
     networks:
       - zabbix
     depends_on:
@@ -78,7 +83,7 @@ services:
 
 networks:
   zabbix:
-    driver: bridge
+    external: true
 
 volumes:
   zabbix-snmptraps-data:
