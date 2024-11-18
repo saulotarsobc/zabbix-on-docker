@@ -1,3 +1,3 @@
-FROM zabbix/zabbix-web-nginx-mysql
+FROM zabbix/zabbix-web-nginx-pgsql:latest
 
 EXPOSE 80

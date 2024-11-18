@@ -1,91 +1,101 @@
 services:
-  zabbix-mysql:
-    image: mysql:8
-    container_name: zabbix-mysql
-    restart: always
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./data/zabbix/mysql/data:/var/lib/mysql
+  zabbix-database:
+    image: postgres:15
+    container_name: zabbix-database
     environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-    networks:
-      - zabbix
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
-
-  snmptraps:
-    image: zabbix/zabbix-snmptraps
-    container_name: zabbix-snmptraps
-    restart: always
-    ports:
-      - "162:1162/udp"
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix_password
+      POSTGRES_DB: zabbix
     volumes:
-      - ./data/zabbix/snmptraps:/var/lib/zabbix/snmptraps:rw
-      - ./data/zabbix/mibs:/usr/share/snmp/mibs:ro
+      - zabbix-database:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
     networks:
       - zabbix
 
-  server:
+  zabbix-snmptraps:
+    image: zabbix/zabbix-snmptraps:latest
+    container_name: zabbix-snmptraps
+    environment:
+      ZBX_ENABLE_SNMP_TRAPS: "true"
+    volumes:
+      - zabbix-snmptraps:/var/lib/zabbix/snmptraps
+    ports:
+      - "162:162/udp"
+    depends_on:
+      - zabbix-database
+    restart: unless-stopped
+    networks:
+      - zabbix
+
+  zabbix-server:
     build:
       context: ./Dockerfiles/zabbix-server
+      dockerfile: Dockerfile
     container_name: zabbix-server
-    restart: always
+    environment:
+      DB_SERVER_HOST: zabbix-database
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix_password
+      POSTGRES_DB: zabbix
+    volumes:
+      - zabbix-server:/var/lib/zabbix
+      - zabbix-server:/var/lib/zabbix/export
+      - zabbix-server:/var/lib/zabbix/snmptraps
     ports:
       - "10051:10051"
-    environment:
-      DB_SERVER_HOST: zabbix-mysql
-      DB_SERVER_PORT: "3306"
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-      ZBX_ENABLE_SNMP_TRAPS: "true"
+    depends_on:
+      - zabbix-database
+    restart: unless-stopped
     networks:
       - zabbix
-    volumes:
-      - zabbix-snmptraps-data:/var/lib/zabbix/snmptraps:rw
-      - zabbix-mibs-data:/usr/share/snmp/mibs:ro
-    depends_on:
-      - zabbix-mysql
 
-  web:
+  zabbix-web:
     build:
       context: ./Dockerfiles/zabbix-web
+      dockerfile: Dockerfile
     container_name: zabbix-web
-    restart: always
-    ports:
-      - "80:8080"
     environment:
+      DB_SERVER_HOST: zabbix-database
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix_password
+      POSTGRES_DB: zabbix
       ZBX_SERVER_HOST: zabbix-server
-      DB_SERVER_HOST: zabbix-mysql
-      DB_SERVER_PORT: "3306"
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-      PHP_TZ: America/Sao_Paulo
+      PHP_TZ: "America/Sao_Paulo"
+    volumes:
+      - zabbix-web:/var/lib/zabbix-web
+    depends_on:
+      - zabbix-server
     networks:
       - zabbix
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
-  agent:
+  zabbix-agent:
     build:
       context: ./Dockerfiles/zabbix-agent
+      dockerfile: Dockerfile
     container_name: zabbix-agent
-    restart: always
-    privileged: true
+    environment:
+      ZBX_HOSTNAME: "zabbix-agent"
+      ZBX_SERVER_HOST: "zabbix-server"
     ports:
       - "10050:10050"
+    volumes:
+      - zabbix-agent:/var/lib/zabbix
+    depends_on:
+      - zabbix-server
+    restart: unless-stopped
     networks:
       - zabbix
-    depends_on:
-      - server
-
 networks:
   zabbix:
 
 volumes:
-  zabbix-snmptraps-data:
-  zabbix-mibs-data:
+  zabbix-database:
+  zabbix-snmptraps:
+  zabbix-server:
+  zabbix-agent:
+  zabbix-web:
