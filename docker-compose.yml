@@ -85,7 +85,6 @@ services:
 
 networks:
   zabbix:
-    external: true
 
 volumes:
   zabbix-snmptraps-data:
