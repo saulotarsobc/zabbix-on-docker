@@ -1,5 +1,5 @@
 services:
-  mysql:
+  zabbix-mysql:
     image: mysql:8
     container_name: zabbix-mysql
     restart: always
@@ -48,6 +48,8 @@ services:
     volumes:
       - zabbix-snmptraps-data:/var/lib/zabbix/snmptraps:rw
       - zabbix-mibs-data:/usr/share/snmp/mibs:ro
+    depends_on:
+      - zabbix-mysql
 
   web:
     build:
@@ -69,7 +71,7 @@ services:
       - zabbix
 
   agent:
-    build: 
+    build:
       context: ./Dockerfiles/zabbix-agent
     container_name: zabbix-agent
     restart: always
