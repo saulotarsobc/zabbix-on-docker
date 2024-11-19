@@ -2,12 +2,6 @@
 
 ![alt text](./images/image.png)
 
-## Intallation
-
-```sh
-az ad sp create-for-rbac --name "Any Name" --role reader --scope /subscriptions/{{subscription_id}};
-```
-
 ## Use
 
 ```sh
@@ -16,9 +10,13 @@ cd zabbix-on-docker;
 docker compose up -d;
 ```
 
-## Help
+## Azure credentials
 
-## Tutorial
+```sh
+az ad sp create-for-rbac --name "Any Name" --role reader --scope /subscriptions/{{subscription_id}};
+```
+
+## Help
 
 - [Zabbix Series: 02- Instalación Zabbix usando Docker](https://youtu.be/kD8FHo-OUbQ)
 - [Instalação do Zabbix no Docker / instalação e configuração do Agent Zabbix](https://youtu.be/WHwaapu8ntI)
