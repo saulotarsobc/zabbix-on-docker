@@ -3,6 +3,7 @@
 ![alt text](./images/image.png)
 
 ## Intallation
+
 ```sh
 az ad sp create-for-rbac --name "Any Name" --role reader --scope /subscriptions/{{subscription_id}};
 ```
@@ -35,3 +36,16 @@ docker compose up -d;
 - `DB_SERVER_HOST`: _This variable is IP or DNS name of MySQL server. By default, value is 'mysql-server'_
 - `DB_SERVER_PORT`: _This variable is port of MySQL server. By default, value is '3306'._
 - `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_USER_FILE` and `MYSQL_PASSWORD_FILE`: _These variables are used by Zabbix server to connect to Zabbix database. With the \_FILE variables you can instead provide the path to a file which contains the user / the password instead. Without Docker Swarm or Kubernetes you also have to map the files. Those are exclusive so you can just provide one type - either MYSQL_USER or MYSQL_USER_FILE!_
+
+## Python
+
+```sh
+python3 -m venv .venv;
+source .venv/Scripts/activate; # or 'source .venv/bin/activate;'
+pip install --upgrade pip setuptools wheel;
+python.exe -m pip install --upgrade pip;
+pip install -r requirements.txt;
+
+# run
+python main.py;
+```

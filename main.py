@@ -6,48 +6,59 @@ import os
 # Carrega as variáveis do arquivo .env
 load_dotenv()
 
-# Configurações de autenticação
-app_id = os.getenv("APP_ID")
-password = os.getenv("PASSWORD")
-tenant_id = os.getenv("TENANT_ID")
-subscription_id = os.getenv("SUBSCRIPTION_ID")
+# Valida e carrega as variáveis de ambiente
+def get_env_variable(var_name):
+    value = os.getenv(var_name)
+    if not value:
+        raise ValueError(f"A variável de ambiente '{var_name}' não está definida.")
+    return value
 
-# URL para obter o token
-token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
+app_id = get_env_variable("APP_ID")
+password = get_env_variable("PASSWORD")
+tenant_id = get_env_variable("TENANT_ID")
+subscription_id = get_env_variable("SUBSCRIPTION_ID")
 
-# Parâmetros para obter o token
-token_data = {
-    "grant_type": "client_credentials",
-    "client_id": app_id,
-    "client_secret": password,
-    "resource": "https://management.azure.com/"
-}
+# Obtém o token de acesso
+def get_access_token(app_id, password, tenant_id):
+    token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
+    token_data = {
+        "grant_type": "client_credentials",
+        "client_id": app_id,
+        "client_secret": password,
+        "resource": "https://management.azure.com/"
+    }
+    try:
+        response = requests.post(token_url, data=token_data)
+        response.raise_for_status()
+        return response.json().get("access_token")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Erro ao obter o token de acesso: {e}")
 
-# Faz a requisição para obter o token
-token_response = requests.post(token_url, data=token_data)
-token_response.raise_for_status()
-access_token = token_response.json().get("access_token")
+# Lista os recursos da assinatura
+def list_resources(subscription_id, access_token):
+    base_url = f"https://management.azure.com/subscriptions/{subscription_id}/resources"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    params = {"api-version": "2021-04-01"}
 
-# Cabeçalhos para as requisições subsequentes
-headers = {
-    "Authorization": f"Bearer {access_token}",
-    "Content-Type": "application/json"
-}
+    try:
+        response = requests.get(base_url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Erro ao listar os recursos: {e}")
 
-# URL base para listar recursos
-base_url = f"https://management.azure.com/subscriptions/{subscription_id}/resources"
+# Programa principal
+if __name__ == "__main__":
+    try:
+        print("Obtendo token de acesso...")
+        access_token = get_access_token(app_id, password, tenant_id)
+        print("Token obtido com sucesso.")
 
-# Parâmetros para a requisição
-params = {
-    "api-version": "2021-04-01"
-}
-
-# Faz a requisição para listar os recursos
-response = requests.get(base_url, headers=headers, params=params)
-response.raise_for_status()
-
-# Lista de recursos
-resources = response.json()
-
-# Imprime os recursos
-print(json.dumps(resources, indent=2))
+        print("Listando recursos...")
+        resources = list_resources(subscription_id, access_token)
+        print(json.dumps(resources, indent=2))
+    except Exception as e:
+        print(f"Erro: {e}")
