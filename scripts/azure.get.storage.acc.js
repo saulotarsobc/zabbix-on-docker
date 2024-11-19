@@ -110,6 +110,6 @@ try {
 }
 catch (error) {
     error += (String(error).endsWith('.')) ? '' : '.';
-    Zabbix.log(3, '[ Azure ] ERROR: ' + error);
+    // Zabbix.log(3, '[ Azure ] ERROR: ' + error);
     return JSON.stringify({ 'error': error });
 }

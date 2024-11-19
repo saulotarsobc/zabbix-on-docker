@@ -25,7 +25,7 @@ var Azure = {
             request.addHeader('Authorization: Bearer ' + Azure.token);
         }
 
-        Zabbix.log(4, '[ Azure ] Sending request: ' + url);
+        // Zabbix.log(4, '[ Azure ] Sending request: ' + url);
 
         if (data !== '') {
             request.addHeader('Content-Type: application/x-www-form-urlencoded');
@@ -35,7 +35,7 @@ var Azure = {
             response = request.get(url);
         }
 
-        Zabbix.log(4, '[ Azure ] Received response with status code ' + request.getStatus() + ': ' + response);
+        // Zabbix.log(4, '[ Azure ] Received response with status code ' + request.getStatus() + ': ' + response);
 
         if (request.getStatus() !== 200 || response === null) {
             throw 'Request failed with status code ' + request.getStatus() + ': ' + response;

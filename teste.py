@@ -76,6 +76,11 @@ if __name__ == "__main__":
         metric_definitions = get_metrics(RESOURCE_ID, token)
         metrics = metric_definitions.get("value", [])
 
+        print("Measurement Names:")
+        for metric in metrics:
+            metric_name = metric['name']['value']
+            print(metric_name)
+
         for metric in metrics:
             metric_name = metric['name']['value']
             print(f"Obtendo valores para métrica: {metric_name}")
