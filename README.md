@@ -24,6 +24,7 @@ az ad sp create-for-rbac --name "Zabbix subscription 1" --role reader --scope /s
 
 ## Help
 
+- [Monitorando custos do Azure com Zabbix](https://youtu.be/mNaucLToMuI)
 - [Zabbix Series: 02- Instalación Zabbix usando Docker](https://youtu.be/kD8FHo-OUbQ)
 - [Instalação do Zabbix no Docker / instalação e configuração do Agent Zabbix](https://youtu.be/WHwaapu8ntI)
 - [Instalar o Azure PowerShell no Windows](https://learn.microsoft.com/pt-br/powershell/azure/install-azps-linux?view=azps-12.1.0)
