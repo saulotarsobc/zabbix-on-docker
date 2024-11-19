@@ -18,7 +18,6 @@ password = get_env_variable("PASSWORD")
 tenant_id = get_env_variable("TENANT_ID")
 subscription_id = get_env_variable("SUBSCRIPTION_ID")
 
-# Obtém o token de acesso
 def get_access_token(app_id, password, tenant_id):
     token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
     token_data = {
@@ -34,7 +33,6 @@ def get_access_token(app_id, password, tenant_id):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Erro ao obter o token de acesso: {e}")
 
-# Lista os recursos da assinatura
 def list_resources(subscription_id, access_token):
     base_url = f"https://management.azure.com/subscriptions/{subscription_id}/resources"
     headers = {
@@ -53,11 +51,7 @@ def list_resources(subscription_id, access_token):
 # Programa principal
 if __name__ == "__main__":
     try:
-        print("Obtendo token de acesso...")
         access_token = get_access_token(app_id, password, tenant_id)
-        print("Token obtido com sucesso.")
-
-        print("Listando recursos...")
         resources = list_resources(subscription_id, access_token)
         print(json.dumps(resources, indent=2))
     except Exception as e:

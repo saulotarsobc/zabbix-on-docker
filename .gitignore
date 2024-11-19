@@ -1,8 +1,4 @@
 /data
 .env
 /.venv
-model.json
-teste.py
-data.txt
-Untitled-1.json
-Untitled-2.json
+/*.json
