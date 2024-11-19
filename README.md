@@ -13,7 +13,13 @@ docker compose up -d;
 ## Azure credentials
 
 ```sh
-az ad sp create-for-rbac --name "Any Name" --role reader --scope /subscriptions/{{subscription_id}};
+az ad sp create-for-rbac --name "Zabbix subscription 1" --role reader --scope /subscriptions/{{subscription_id}};
+# {
+#   "appId": "********-****-****-****-********",
+#   "displayName": "Zabbix subscription 1",
+#   "password": "aaaaaaaaaaabbbbbbbbbbbccccccccccddddddd",
+#   "tenant": "********-****-****-****-********"
+# }
 ```
 
 ## Help
