@@ -3,10 +3,8 @@ import json
 from dotenv import load_dotenv
 import os
 
-# Carrega as variáveis do arquivo .env
 load_dotenv()
 
-# Valida e carrega as variáveis de ambiente
 def get_env_variable(var_name):
     value = os.getenv(var_name)
     if not value:
@@ -48,7 +46,6 @@ def list_resources(subscription_id, access_token):
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Erro ao listar os recursos: {e}")
 
-# Programa principal
 if __name__ == "__main__":
     try:
         access_token = get_access_token(app_id, password, tenant_id)
