@@ -1,6 +1,6 @@
 require("dotenv").config();
-import { DefaultAzureCredential } from "@azure/identity";
 import { ContainerServiceClient } from "@azure/arm-containerservice";
+import { DefaultAzureCredential } from "@azure/identity";
 
 async function main() {
   // Obter as credenciais
@@ -34,8 +34,8 @@ async function main() {
     console.log(JSON.stringify(clusters, null, 2));
 
     // Caso queira detalhes de um cluster específico
-    const RESOURCE_GROUP = "rg_k8s_hcode"; // Nome do grupo de recursos
-    const CLUSTER_NAME = "hcode_k8s"; // Nome do cluster
+    const RESOURCE_GROUP = "aaaaaaa"; // Nome do grupo de recursos
+    const CLUSTER_NAME = "bbbbbbb"; // Nome do cluster
 
     console.log(`Obtendo detalhes do cluster: ${CLUSTER_NAME}...`);
     const clusterDetails = await containerServiceClient.managedClusters.get(

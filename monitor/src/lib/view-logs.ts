@@ -40,7 +40,7 @@ async function main() {
 
   const logs = new k8s.Log(kc);
   const stream = await logs.log(
-    "hcode",
+    "asas",
     process.env.POD_NAME || "api-xxx-yyy",
     "api",
     process.stdout,
