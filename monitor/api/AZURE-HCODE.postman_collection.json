@@ -1,0 +1,137 @@
+{
+	"info": {
+		"_postman_id": "b02d53bc-51a3-41e7-a680-759b2b129cbc",
+		"name": "AZURE-HCODE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36405688",
+		"_collection_link": "https://interstellar-shadow-9711.postman.co/workspace/9a05698e-07bc-4b5d-bf2e-182ee2f93b17/collection/36405688-b02d53bc-51a3-41e7-a680-759b2b129cbc?action=share&source=collection_link&creator=36405688"
+	},
+	"item": [
+		{
+			"name": "listPodForAllNamespaces",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{URL}}/listPodForAllNamespaces",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"listPodForAllNamespaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "listNamespacedPod",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"namespace\": \"{{NAME_SPACE}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/listNamespacedPod",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"listNamespacedPod"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "listPersistentVolume",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{URL}}/listPersistentVolume",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"listPersistentVolume"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getPodMetrics",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"namespace\": \"{{NAME_SPACE}}\",\r\n    \"podName\": \"{{POD_NAME}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}/getPodMetrics",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"getPodMetrics"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{TOKEN}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
