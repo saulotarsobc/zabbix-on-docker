@@ -11,7 +11,7 @@ const metricsClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
 dotenv.config();
 // Configuracoes
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3333;
 
 // App
 const app = express();

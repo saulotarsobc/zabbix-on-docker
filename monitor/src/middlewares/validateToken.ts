@@ -5,6 +5,8 @@ export function validateToken(
   res: Response,
   next: NextFunction
 ): void {
+  console.log("Validando token...");
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
