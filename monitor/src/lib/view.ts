@@ -1,5 +1,4 @@
 import * as k8s from "@kubernetes/client-node";
-import { IncomingMessage } from "http";
 
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
@@ -8,10 +7,7 @@ const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
 async function listContainers() {
   try {
-    const response: {
-      response: IncomingMessage;
-      body: k8s.V1PodList;
-    } = await k8sApi.listPodForAllNamespaces();
+    const response = await k8sApi.listPodForAllNamespaces();
     // const pods = response.body.items;
     // const apiContainers: any = [];
 
@@ -41,7 +37,6 @@ async function listContainers() {
 }
 
 async function getContainerMetrics(
-  name: string,
   namespace: string,
   podName: string
 ): Promise<any> {
@@ -55,10 +50,7 @@ async function getContainerMetrics(
     podName
   );
 
-  return {
-    name,
-    ...metricsResponse.body.containers[0].usage,
-  };
+  return metricsResponse.body.containers[0].usage;
 }
 
 async function main() {
@@ -73,12 +65,14 @@ async function main() {
 
   for (const container of containers?.items) {
     const metrics = await getContainerMetrics(
-      container?.metadata?.name || "",
       container?.metadata?.namespace || "",
       container?.metadata?.name || ""
     );
 
-    console.log(JSON.stringify(metrics, null, 2));
+    console.log(
+      container?.metadata?.name || "",
+      JSON.stringify(metrics, null, 2)
+    );
   }
 }
 
