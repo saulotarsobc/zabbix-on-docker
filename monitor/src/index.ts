@@ -1,56 +1,21 @@
-require("dotenv").config();
-import { DefaultAzureCredential } from "@azure/identity";
-import { ResourceManagementClient } from "@azure/arm-resources";
+import dotenv from "dotenv";
+import express from "express";
+import { validateToken } from "./middlewares";
+import { containersRouter } from "./routes/containers";
 
-async function main() {
-  // Obter as credenciais do Azure
-  const credential = new DefaultAzureCredential();
+dotenv.config();
+// Configuracoes
+const PORT = process.env.PORT || 3000;
 
-  // ID da assinatura do Azure (configure no .env ou substitua diretamente aqui)
-  const subscriptionId =
-    process.env.AZURE_SUBSCRIPTION_ID || "SEU_SUBSCRIPTION_ID";
+// App
+const app = express();
 
-  // Cliente de Gerenciamento de Recursos
-  const resourceClient = new ResourceManagementClient(
-    credential,
-    subscriptionId
-  );
+// Middlewares
+app.use(validateToken);
+app.use(express.json());
 
-  // Filtro por tipo de recurso
-  const filter =
-    "resourceType eq 'Microsoft.ContainerService/managedClusters' or resourceType eq 'Microsoft.ContainerInstance/containerGroups'";
+// Rotas
+app.use("/containers", containersRouter);
 
-  const containerResources = [];
-
-  // Listar recursos com o filtro aplicado
-  for await (const resource of resourceClient.resources.list({ filter })) {
-    containerResources.push({
-      id: resource.id,
-      name: resource.name,
-      type: resource.type,
-      location: resource.location,
-    });
-  }
-
-  console.log("Recursos de contêiner encontrados:");
-  console.log(JSON.stringify(containerResources, null, 2));
-
-  for (const resource of containerResources) {
-    try {
-      // Obter informações detalhadas do recurso
-      const resourceDetails = await resourceClient.resources.getById(
-        String(resource.id),
-        "2024-07-01"
-      );
-
-      console.log("Detalhes do recurso:");
-      console.log(JSON.stringify(resourceDetails, null, 2));
-    } catch (error: any) {
-      console.error("Erro ao obter detalhes do recurso:", error.message);
-    }
-  }
-}
-
-main().catch((err) => {
-  console.error("Erro:", err.message);
-});
+// Servidor
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
