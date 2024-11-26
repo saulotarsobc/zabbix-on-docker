@@ -1,5 +1,14 @@
 # metricnames
 
+## Pods status
+
+- Pending
+- Failed
+- Running
+- Succeeded
+- Unknown
+- ??? CrashLoopBackOff
+
 ## VM's
 
 ```txt
