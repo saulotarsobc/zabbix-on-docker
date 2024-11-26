@@ -1,0 +1,1833 @@
+diff --git a/Dockerfiles/zabbix-agent/Dockerfile b/Dockerfiles/zabbix-agent/Dockerfile
+deleted file mode 100644
+index 0b64bd1..0000000
+--- a/Dockerfiles/zabbix-agent/Dockerfile
++++ /dev/null
+@@ -1,5 +0,0 @@
+-FROM zabbix/zabbix-agent:latest
+-
+-COPY zabbix_agentd.conf /etc/zabbix/zabbix_agentd.conf
+-
+-EXPOSE 10050
+\ No newline at end of file
+diff --git a/Dockerfiles/zabbix-agent/zabbix_agentd.conf b/Dockerfiles/zabbix-agent/zabbix_agentd.conf
+deleted file mode 100644
+index a88f4a2..0000000
+--- a/Dockerfiles/zabbix-agent/zabbix_agentd.conf
++++ /dev/null
+@@ -1,549 +0,0 @@
+-# This is a configuration file for Zabbix agent daemon (Unix)
+-# To get more information about Zabbix, visit https://www.zabbix.com
+-
+-############ GENERAL PARAMETERS #################
+-
+-### Option: PidFile
+-#Name of PID file.
+-#
+-# Mandatory: no
+-# Default:
+-# PidFile=/tmp/zabbix_agentd.pid
+-
+-### Option: LogType
+-#Specifies where log messages are written to:
+-#system  - syslog
+-#file    - file specified with LogFile parameter
+-#console - standard output
+-#
+-# Mandatory: no
+-# Default:
+-# LogType=file
+-LogType=console
+-
+-### Option: LogFile
+-#Log file name for LogType 'file' parameter.
+-#
+-# Mandatory: yes, if LogType is set to file, otherwise no
+-# Default:
+-# LogFile=
+-
+-
+-### Option: LogFileSize
+-#Maximum size of log file in MB.
+-#0 - disable automatic log rotation.
+-#
+-# Mandatory: no
+-# Range: 0-1024
+-# Default:
+-# LogFileSize=1
+-
+-### Option: DebugLevel
+-#Specifies debug level:
+-#0 - basic information about starting and stopping of Zabbix processes
+-#1 - critical information
+-#2 - error information
+-#3 - warnings
+-#4 - for debugging (produces lots of information)
+-#5 - extended debugging (produces even more information)
+-#
+-# Mandatory: no
+-# Range: 0-5
+-# Default:
+-# DebugLevel=3
+-
+-### Option: SourceIP
+-#Source IP address for outgoing connections.
+-#
+-# Mandatory: no
+-# Default:
+-# SourceIP=
+-
+-### Option: AllowKey
+-#Allow execution of item keys matching pattern.
+-#Multiple keys matching rules may be defined in combination with DenyKey.
+-#Key pattern is wildcard expression, which support "*" character to match any number of any characters in certain position. It might be used in both key name and key arguments.
+-#Parameters are processed one by one according their appearance order.
+-#If no AllowKey or DenyKey rules defined, all keys are allowed.
+-#
+-# Mandatory: no
+-
+-### Option: DenyKey
+-#Deny execution of items keys matching pattern.
+-#Multiple keys matching rules may be defined in combination with AllowKey.
+-#Key pattern is wildcard expression, which support "*" character to match any number of any characters in certain position. It might be used in both key name and key arguments.
+-#Parameters are processed one by one according their appearance order.
+-#If no AllowKey or DenyKey rules defined, all keys are allowed.
+-#       Unless another system.run[*] rule is specified DenyKey=system.run[*] is added by default.
+-#
+-# Mandatory: no
+-# Default:
+-# DenyKey=system.run[*]
+-
+-### Option: EnableRemoteCommands - Deprecated, use AllowKey=system.run[*] or DenyKey=system.run[*] instead
+-#Internal alias for AllowKey/DenyKey parameters depending on value:
+-#0 - DenyKey=system.run[*]
+-#1 - AllowKey=system.run[*]
+-#
+-# Mandatory: no
+-
+-### Option: LogRemoteCommands
+-#Enable logging of executed shell commands as warnings.
+-#0 - disabled
+-#1 - enabled
+-#
+-# Mandatory: no
+-# Default:
+-# LogRemoteCommands=0
+-
+-##### Passive checks related
+-
+-### Option: Server
+-#List of comma delimited IP addresses, optionally in CIDR notation, or DNS names of Zabbix servers and Zabbix proxies.
+-#Incoming connections will be accepted only from the hosts listed here.
+-#If IPv6 support is enabled then '127.0.0.1', '::127.0.0.1', '::ffff:127.0.0.1' are treated equally
+-#and '::/0' will allow any IPv4 or IPv6 address.
+-#'0.0.0.0/0' can be used to allow any IPv4 address.
+-#Example: Server=127.0.0.1,192.168.1.0/24,::1,2001:db8::/32,zabbix.example.com
+-#
+-# Mandatory: yes, if StartAgents is not explicitly set to 0
+-# Default:
+-# Server=
+-
+-Server=zabbix-server
+-
+-### Option: ListenPort
+-#Agent will listen on this port for connections from the server.
+-#
+-# Mandatory: no
+-# Range: 1024-32767
+-# Default:
+-# ListenPort=10050
+-
+-### Option: ListenIP
+-#List of comma delimited IP addresses that the agent should listen on.
+-#First IP address is sent to Zabbix server if connecting to it to retrieve list of active checks.
+-#
+-# Mandatory: no
+-# Default:
+-# ListenIP=0.0.0.0
+-
+-### Option: StartAgents
+-#Number of pre-forked instances of zabbix_agentd that process passive checks.
+-#If set to 0, disables passive checks and the agent will not listen on any TCP port.
+-#
+-# Mandatory: no
+-# Range: 0-100
+-# Default:
+-# StartAgents=10
+-
+-##### Active checks related
+-
+-### Option: ServerActive
+-#Zabbix server/proxy address or cluster configuration to get active checks from.
+-#Server/proxy address is IP address or DNS name and optional port separated by colon.
+-#Cluster configuration is one or more server addresses separated by semicolon.
+-#Multiple Zabbix servers/clusters and Zabbix proxies can be specified, separated by comma.
+-#More than one Zabbix proxy should not be specified from each Zabbix server/cluster.
+-#If Zabbix proxy is specified then Zabbix server/cluster for that proxy should not be specified.
+-#Multiple comma-delimited addresses can be provided to use several independent Zabbix servers in parallel. Spaces are allowed.
+-#If port is not specified, default port is used.
+-#IPv6 addresses must be enclosed in square brackets if port for that host is specified.
+-#If port is not specified, square brackets for IPv6 addresses are optional.
+-#If this parameter is not specified, active checks are disabled.
+-#Example for Zabbix proxy:
+-#ServerActive=127.0.0.1:10051
+-#Example for multiple servers:
+-#ServerActive=127.0.0.1:20051,zabbix.domain,[::1]:30051,::1,[12fc::1]
+-#Example for high availability:
+-#ServerActive=zabbix.cluster.node1;zabbix.cluster.node2:20051;zabbix.cluster.node3
+-#Example for high availability with two clusters and one server:
+-#ServerActive=zabbix.cluster.node1;zabbix.cluster.node2:20051,zabbix.cluster2.node1;zabbix.cluster2.node2,zabbix.domain
+-#
+-# Mandatory: no
+-# Default:
+-# ServerActive=
+-
+-ServerActive=zabbix-server:10051
+-
+-### Option: Hostname
+-#List of comma delimited unique, case sensitive hostnames.
+-#Required for active checks and must match hostnames as configured on the server.
+-#Value is acquired from HostnameItem if undefined.
+-#
+-# Mandatory: no
+-# Default:
+-# Hostname=
+-
+-
+-### Option: HostnameItem
+-#Item used for generating Hostname if it is undefined. Ignored if Hostname is defined.
+-#Does not support UserParameters or aliases.
+-#
+-# Mandatory: no
+-# Default:
+-# HostnameItem=system.hostname
+-
+-### Option: HostMetadata
+-#Optional parameter that defines host metadata.
+-#Host metadata is used at host auto-registration process.
+-#An agent will issue an error and not start if the value is over limit of 2034 bytes.
+-#If not defined, value will be acquired from HostMetadataItem.
+-#
+-# Mandatory: no
+-# Range: 0-2034 bytes
+-# Default:
+-# HostMetadata=
+-
+-### Option: HostMetadataItem
+-#Optional parameter that defines an item used for getting host metadata.
+-#Host metadata is used at host auto-registration process.
+-#During an auto-registration request an agent will log a warning message if
+-#the value returned by specified item is over limit of 65535 characters.
+-#This option is only used when HostMetadata is not defined.
+-#
+-# Mandatory: no
+-# Default:
+-# HostMetadataItem=
+-
+-### Option: HostInterface
+-#Optional parameter that defines host interface.
+-#Host interface is used at host auto-registration process.
+-#An agent will issue an error and not start if the value is over limit of 255 characters.
+-#If not defined, value will be acquired from HostInterfaceItem.
+-#
+-# Mandatory: no
+-# Range: 0-255 characters
+-# Default:
+-# HostInterface=
+-
+-### Option: HostInterfaceItem
+-#Optional parameter that defines an item used for getting host interface.
+-#Host interface is used at host auto-registration process.
+-#During an auto-registration request an agent will log a warning message if
+-#the value returned by specified item is over limit of 255 characters.
+-#This option is only used when HostInterface is not defined.
+-#
+-# Mandatory: no
+-# Default:
+-# HostInterfaceItem=
+-
+-### Option: RefreshActiveChecks
+-#How often list of active checks is refreshed, in seconds.
+-#
+-# Mandatory: no
+-# Range: 1-86400
+-# Default:
+-# RefreshActiveChecks=5
+-
+-### Option: BufferSend
+-#Do not keep data longer than N seconds in buffer.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# BufferSend=5
+-
+-### Option: BufferSize
+-#Maximum number of values in a memory buffer. The agent will send
+-#all collected data to Zabbix Server or Proxy if the buffer is full.
+-#
+-# Mandatory: no
+-# Range: 2-65535
+-# Default:
+-# BufferSize=100
+-
+-### Option: MaxLinesPerSecond
+-#Maximum number of new lines the agent will send per second to Zabbix Server
+-#or Proxy processing 'log' and 'logrt' active checks.
+-#The provided value will be overridden by the parameter 'maxlines',
+-#provided in 'log' or 'logrt' item keys.
+-#
+-# Mandatory: no
+-# Range: 1-1000
+-# Default:
+-# MaxLinesPerSecond=20
+-
+-### Option: HeartbeatFrequency
+-#Frequency of heartbeat messages in seconds.
+-#Used for monitoring availability of active checks.
+-#0 - heartbeat messages disabled.
+-#
+-# Mandatory: no
+-# Range: 0-3600
+-# Default: 60
+-# HeartbeatFrequency=
+-
+-############ ADVANCED PARAMETERS #################
+-
+-### Option: Alias
+-#Sets an alias for an item key. It can be used to substitute long and complex item key with a smaller and simpler one.
+-#Multiple Alias parameters may be present. Multiple parameters with the same Alias key are not allowed.
+-#Different Alias keys may reference the same item key.
+-#For example, to retrieve the ID of user 'zabbix':
+-#Alias=zabbix.userid:vfs.file.regexp[/etc/passwd,^zabbix:.:([0-9]+),,,,\1]
+-#Now shorthand key zabbix.userid may be used to retrieve data.
+-#Aliases can be used in HostMetadataItem but not in HostnameItem parameters.
+-#
+-# Mandatory: no
+-# Range:
+-# Default:
+-
+-### Option: Timeout
+-#Specifies timeout for communications (in seconds).
+-#
+-# Mandatory: no
+-# Range: 1-30
+-# Default:
+-# Timeout=3
+-
+-### Option: AllowRoot
+-#Allow the agent to run as 'root'. If disabled and the agent is started by 'root', the agent
+-#will try to switch to the user specified by the User configuration option instead.
+-#Has no effect if started under a regular user.
+-#0 - do not allow
+-#1 - allow
+-#
+-# Mandatory: no
+-# Default:
+-# AllowRoot=0
+-
+-### Option: User
+-#Drop privileges to a specific, existing user on the system.
+-#Only has effect if run as 'root' and AllowRoot is disabled.
+-#
+-# Mandatory: no
+-# Default:
+-# User=zabbix
+-User=zabbix
+-
+-### Option: Include
+-#You may include individual files or all files in a directory in the configuration file.
+-#Installing Zabbix will create include directory in /usr/local/etc, unless modified during the compile time.
+-#
+-# Mandatory: no
+-# Default:
+-Include=/etc/zabbix/zabbix_agentd.d/*.conf
+-# Include=
+-
+-# Include=/usr/local/etc/zabbix_agentd.userparams.conf
+-# Include=/usr/local/etc/zabbix_agentd.conf.d/
+-# Include=/usr/local/etc/zabbix_agentd.conf.d/*.conf
+-
+-####### USER-DEFINED MONITORED PARAMETERS #######
+-
+-### Option: UnsafeUserParameters
+-#Allow all characters to be passed in arguments to user-defined parameters.
+-#The following characters are not allowed:
+-#\ ' " ` * ? [ ] { } ~ $ ! & ; ( ) < > | # @
+-#Additionally, newline characters are not allowed.
+-#0 - do not allow
+-#1 - allow
+-#
+-# Mandatory: no
+-# Range: 0-1
+-# Default:
+-# UnsafeUserParameters=0
+-
+-### Option: UserParameter
+-#User-defined parameter to monitor. There can be several user-defined parameters.
+-#Format: UserParameter=<key>,<shell command>
+-#See 'zabbix_agentd' directory for examples.
+-#
+-# Mandatory: no
+-# Default:
+-# UserParameter=
+-
+-### Option: UserParameterDir
+-#Directory to execute UserParameter commands from. Only one entry is allowed.
+-#When executing UserParameter commands the agent will change the working directory to the one
+-#specified in the UserParameterDir option.
+-#This way UserParameter commands can be specified using the relative ./ prefix.
+-#
+-# Mandatory: no
+-# Default:
+-# UserParameterDir=
+-
+-####### LOADABLE MODULES #######
+-
+-### Option: LoadModulePath
+-#Full path to location of agent modules.
+-#Default depends on compilation options.
+-#To see the default path run command "zabbix_agentd --help".
+-#
+-# Mandatory: no
+-# Default:
+-# LoadModulePath=${libdir}/modules
+-LoadModulePath=/var/lib/zabbix/modules/
+-
+-### Option: LoadModule
+-#Module to load at agent startup. Modules are used to extend functionality of the agent.
+-#Formats:
+-#LoadModule=<module.so>
+-#LoadModule=<path/module.so>
+-#LoadModule=</abs_path/module.so>
+-#Either the module must be located in directory specified by LoadModulePath or the path must precede the module name.
+-#If the preceding path is absolute (starts with '/') then LoadModulePath is ignored.
+-#It is allowed to include multiple LoadModule parameters.
+-#
+-# Mandatory: no
+-# Default:
+-# LoadModule=
+-
+-####### TLS-RELATED PARAMETERS #######
+-
+-### Option: TLSConnect
+-#How the agent should connect to server or proxy. Used for active checks.
+-#Only one value can be specified:
+-#unencrypted - connect without encryption
+-#psk         - connect using TLS and a pre-shared key
+-#cert        - connect using TLS and a certificate
+-#
+-# Mandatory: yes, if TLS certificate or PSK parameters are defined (even for 'unencrypted' connection)
+-# Default:
+-# TLSConnect=unencrypted
+-
+-### Option: TLSAccept
+-#What incoming connections to accept.
+-#Multiple values can be specified, separated by comma:
+-#unencrypted - accept connections without encryption
+-#psk         - accept connections secured with TLS and a pre-shared key
+-#cert        - accept connections secured with TLS and a certificate
+-#
+-# Mandatory: yes, if TLS certificate or PSK parameters are defined (even for 'unencrypted' connection)
+-# Default:
+-# TLSAccept=unencrypted
+-
+-### Option: TLSCAFile
+-#Full pathname of a file containing the top-level CA(s) certificates for
+-#peer certificate verification.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCAFile=
+-
+-### Option: TLSCRLFile
+-#Full pathname of a file containing revoked certificates.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCRLFile=
+-
+-### Option: TLSServerCertIssuer
+-#Allowed server certificate issuer.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSServerCertIssuer=
+-
+-### Option: TLSServerCertSubject
+-#Allowed server certificate subject.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSServerCertSubject=
+-
+-### Option: TLSCertFile
+-#Full pathname of a file containing the agent certificate or certificate chain.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCertFile=
+-
+-### Option: TLSKeyFile
+-#Full pathname of a file containing the agent private key.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSKeyFile=
+-
+-### Option: TLSPSKIdentity
+-#Unique, case sensitive string used to identify the pre-shared key.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSPSKIdentity=
+-
+-### Option: TLSPSKFile
+-#Full pathname of a file containing the pre-shared key.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSPSKFile=
+-
+-####### For advanced users - TLS ciphersuite selection criteria #######
+-
+-### Option: TLSCipherCert13
+-#Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#Override the default ciphersuite selection criteria for certificate-based encryption.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherCert13=
+-
+-### Option: TLSCipherCert
+-#GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#Override the default ciphersuite selection criteria for certificate-based encryption.
+-#Example for GnuTLS:
+-#NONE:+VERS-TLS1.2:+ECDHE-RSA:+RSA:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL:+CTYPE-X.509
+-#Example for OpenSSL:
+-#EECDH+aRSA+AES128:RSA+aRSA+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherCert=
+-
+-### Option: TLSCipherPSK13
+-#Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#Override the default ciphersuite selection criteria for PSK-based encryption.
+-#Example:
+-#TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherPSK13=
+-
+-### Option: TLSCipherPSK
+-#GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#Override the default ciphersuite selection criteria for PSK-based encryption.
+-#Example for GnuTLS:
+-#NONE:+VERS-TLS1.2:+ECDHE-PSK:+PSK:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL
+-#Example for OpenSSL:
+-#kECDHEPSK+AES128:kPSK+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherPSK=
+-
+-### Option: TLSCipherAll13
+-#Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#Override the default ciphersuite selection criteria for certificate- and PSK-based encryption.
+-#Example:
+-#TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherAll13=
+-
+-### Option: TLSCipherAll
+-#GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#Override the default ciphersuite selection criteria for certificate- and PSK-based encryption.
+-#Example for GnuTLS:
+-#NONE:+VERS-TLS1.2:+ECDHE-RSA:+RSA:+ECDHE-PSK:+PSK:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL:+CTYPE-X.509
+-#Example for OpenSSL:
+-#EECDH+aRSA+AES128:RSA+aRSA+AES128:kECDHEPSK+AES128:kPSK+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherAll=
+-
+-####### For advanced users - TCP-related fine-tuning parameters #######
+-
+-## Option: ListenBacklog
+-#       The maximum number of pending connections in the queue. This parameter is passed to
+-#       listen() function as argument 'backlog' (see "man listen").
+-#
+-# Mandatory: no
+-# Range: 0 - INT_MAX (depends on system, too large values may be silently truncated to implementation-specified maximum)
+-# Default: SOMAXCONN (hard-coded constant, depends on system)
+-# ListenBacklog=
+\ No newline at end of file
+diff --git a/Dockerfiles/zabbix-server/Dockerfile b/Dockerfiles/zabbix-server/Dockerfile
+deleted file mode 100644
+index a1a80a0..0000000
+--- a/Dockerfiles/zabbix-server/Dockerfile
++++ /dev/null
+@@ -1,6 +0,0 @@
+-FROM zabbix/zabbix-server-pgsql:latest
+-
+-COPY zabbix_server.conf /etc/zabbix/zabbix_server.conf
+-
+-EXPOSE 10051
+-
+diff --git a/Dockerfiles/zabbix-server/zabbix_server.conf b/Dockerfiles/zabbix-server/zabbix_server.conf
+deleted file mode 100644
+index 712f74b..0000000
+--- a/Dockerfiles/zabbix-server/zabbix_server.conf
++++ /dev/null
+@@ -1,1130 +0,0 @@
+-# This is a configuration file for Zabbix server daemon
+-# To get more information about Zabbix, visit https://www.zabbix.com
+-
+-############ GENERAL PARAMETERS #################
+-
+-### Option: ListenPort
+-#	Listen port for trapper.
+-#
+-# Mandatory: no
+-# Range: 1024-32767
+-# Default:
+-# ListenPort=10051
+-
+-### Option: SourceIP
+-#	Source IP address for outgoing connections.
+-#
+-# Mandatory: no
+-# Default:
+-# SourceIP=
+-
+-### Option: LogType
+-#	Specifies where log messages are written to:
+-#		system  - syslog
+-#		file    - file specified with LogFile parameter
+-#		console - standard output
+-#
+-# Mandatory: no
+-# Default:
+-# LogType=file
+-LogType=console
+-
+-### Option: LogFile
+-#	Log file name for LogType 'file' parameter.
+-#
+-# Mandatory: yes, if LogType is set to file, otherwise no
+-# Default:
+-# LogFile=
+-
+-
+-### Option: LogFileSize
+-#	Maximum size of log file in MB.
+-#	0 - disable automatic log rotation.
+-#
+-# Mandatory: no
+-# Range: 0-1024
+-# Default:
+-# LogFileSize=1
+-
+-### Option: DebugLevel
+-#	Specifies debug level:
+-#	0 - basic information about starting and stopping of Zabbix processes
+-#	1 - critical information
+-#	2 - error information
+-#	3 - warnings
+-#	4 - for debugging (produces lots of information)
+-#	5 - extended debugging (produces even more information)
+-#
+-# Mandatory: no
+-# Range: 0-5
+-# Default:
+-# DebugLevel=3
+-
+-### Option: PidFile
+-#	Name of PID file.
+-#
+-# Mandatory: no
+-# Default:
+-# PidFile=/tmp/zabbix_server.pid
+-
+-### Option: SocketDir
+-#	IPC socket directory.
+-#		Directory to store IPC sockets used by internal Zabbix services.
+-#
+-# Mandatory: no
+-# Default:
+-# SocketDir=/tmp
+-SocketDir=/tmp/
+-
+-### NOTE: Support for Oracle DB is deprecated since Zabbix 7.0 and will be removed in future versions.
+-
+-### Option: DBHost
+-#	Database host name.
+-#	If set to localhost, socket is used for MySQL.
+-#	If set to empty string, socket is used for PostgreSQL.
+-#	If set to empty string, the Net Service Name connection method is used to connect to Oracle database; also see
+-#	the TNS_ADMIN environment variable to specify the directory where the tnsnames.ora file is located.
+-#
+-# Mandatory: no
+-# Default:
+-# DBHost=localhost
+-DBHost=zabbix-mysql
+-
+-### Option: DBName
+-#	Database name.
+-#	If the Net Service Name connection method is used to connect to Oracle database, specify the service name from
+-#	the tnsnames.ora file or set to empty string; also see the TWO_TASK environment variable if DBName is set to
+-#	empty string.
+-#
+-# Mandatory: yes
+-# Default:
+-# DBName=
+-
+-DBName=zabbix
+-
+-### Option: DBSchema
+-#	Schema name. Used for PostgreSQL.
+-#
+-# Mandatory: no
+-# Default:
+-# DBSchema=
+-
+-### Option: DBUser
+-#	Database user.
+-#
+-# Mandatory: no
+-# Default:
+-# DBUser=
+-
+-DBUser=zabbix
+-
+-### Option: DBPassword
+-#	Database password.
+-#	Comment this line if no password is used.
+-#
+-# Mandatory: no
+-# Default:
+-# DBPassword=
+-DBPassword=zabbix
+-
+-### Option: DBSocket
+-#	Path to MySQL socket.
+-#
+-# Mandatory: no
+-# Default:
+-# DBSocket=
+-
+-### Option: DBPort
+-#	Database port when not using local socket.
+-#	If the Net Service Name connection method is used to connect to Oracle database, the port number from the
+-#	tnsnames.ora file will be used. The port number set here will be ignored.
+-#
+-# Mandatory: no
+-# Range: 1024-65535
+-# Default:
+-# DBPort=
+-DBPort=3306
+-
+-### Option: AllowUnsupportedDBVersions
+-#	Allow server to work with unsupported database versions.
+-#       0 - do not allow
+-#       1 - allow
+-#
+-# Mandatory: no
+-# Default:
+-# AllowUnsupportedDBVersions=0
+-
+-### Option: HistoryStorageURL
+-#	History storage HTTP[S] URL.
+-#
+-# Mandatory: no
+-# Default:
+-# HistoryStorageURL=
+-
+-### Option: HistoryStorageTypes
+-#	Comma separated list of value types to be sent to the history storage.
+-#
+-# Mandatory: no
+-# Default:
+-# HistoryStorageTypes=uint,dbl,str,log,text
+-
+-### Option: HistoryStorageDateIndex
+-#	Enable preprocessing of history values in history storage to store values in different indices based on date.
+-#	0 - disable
+-#	1 - enable
+-#
+-# Mandatory: no
+-# Default:
+-# HistoryStorageDateIndex=0
+-
+-### Option: ExportDir
+-#	Directory for real time export of events, history and trends in newline delimited JSON format.
+-#	If set, enables real time export.
+-#
+-# Mandatory: no
+-# Default:
+-# ExportDir=
+-
+-### Option: ExportFileSize
+-#	Maximum size per export file in bytes.
+-#	Only used for rotation if ExportDir is set.
+-#
+-# Mandatory: no
+-# Range: 1M-1G
+-# Default:
+-# ExportFileSize=1G
+-
+-### Option: ExportType
+-#	List of comma delimited types of real time export - allows to control export entities by their
+-#	type (events, history, trends) individually.
+-#	Valid only if ExportDir is set.
+-#
+-# Mandatory: no
+-# Default:
+-# ExportType=events,history,trends
+-
+-############ ADVANCED PARAMETERS ################
+-
+-### Option: StartPollers
+-#	Number of pre-forked instances of pollers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartPollers=5
+-
+-### Option: StartAgentPollers
+-#	Number of pre-forked instances of asynchronous Zabbix agent pollers. Also see MaxConcurrentChecksPerPoller.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartAgentPollers=1
+-
+-### Option: StartHTTPAgentPollers
+-#	Number of pre-forked instances of asynchronous HTTP agent pollers. Also see MaxConcurrentChecksPerPoller.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartHTTPAgentPollers=1
+-
+-### Option: StartSNMPPollers
+-#	Number of pre-forked instances of asynchronous SNMP pollers. Also see MaxConcurrentChecksPerPoller.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartSNMPPollers=1
+-
+-### Option: MaxConcurrentChecksPerPoller
+-#	Maximum number of asynchronous checks that can be executed at once by each HTTP agent poller or agent poller.
+-#
+-# Mandatory: no
+-# Range: 1-1000
+-# Default:
+-# MaxConcurrentChecksPerPoller=1000
+-
+-### Option: StartIPMIPollers
+-#	Number of pre-forked instances of IPMI pollers.
+-#		The IPMI manager process is automatically started when at least one IPMI poller is started.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartIPMIPollers=0
+-
+-
+-### Option: StartPreprocessors
+-#	Number of pre-started instances of preprocessing workers.
+-#
+-# Mandatory: no
+-# Range: 1-1000
+-# Default:
+-# StartPreprocessors=3
+-
+-### Option: StartConnectors
+-#	Number of pre-forked instances of connector workers.
+-#		The connector manager process is automatically started when connector worker is started.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartConnectors=0
+-
+-### Option: StartPollersUnreachable
+-#	Number of pre-forked instances of pollers for unreachable hosts (including IPMI and Java).
+-#	At least one poller for unreachable hosts must be running if regular, IPMI or Java pollers
+-#	are started.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartPollersUnreachable=1
+-
+-### Option: StartHistoryPollers
+-#	Number of pre-forked instances of history pollers.
+-#	Only required for calculated checks.
+-#	A database connection is required for each history poller instance.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartHistoryPollers=5
+-
+-### Option: StartTrappers
+-#	Number of pre-forked instances of trappers.
+-#	Trappers accept incoming connections from Zabbix sender, active agents and active proxies.
+-#	At least one trapper process must be running to display server availability and view queue
+-#	in the frontend.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartTrappers=5
+-
+-### Option: StartPingers
+-#	Number of pre-forked instances of ICMP pingers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartPingers=1
+-
+-### Option: StartDiscoverers
+-#	Number of pre-started instances of discovery workers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartDiscoverers=5
+-
+-### Option: StartHTTPPollers
+-#	Number of pre-forked instances of HTTP pollers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartHTTPPollers=1
+-
+-### Option: StartTimers
+-#	Number of pre-forked instances of timers.
+-#	Timers process maintenance periods.
+-#	Only the first timer process handles host maintenance updates. Problem suppression updates are shared
+-#	between all timers.
+-#
+-# Mandatory: no
+-# Range: 1-1000
+-# Default:
+-# StartTimers=1
+-
+-### Option: StartEscalators
+-#	Number of pre-forked instances of escalators.
+-#
+-# Mandatory: no
+-# Range: 1-100
+-# Default:
+-# StartEscalators=1
+-
+-### Option: StartAlerters
+-#	Number of pre-forked instances of alerters.
+-#	Alerters send the notifications created by action operations.
+-#
+-# Mandatory: no
+-# Range: 1-100
+-# Default:
+-# StartAlerters=3
+-
+-### Option: JavaGateway
+-#	IP address (or hostname) of Zabbix Java gateway.
+-#	Only required if Java pollers are started.
+-#
+-# Mandatory: no
+-# Default:
+-# JavaGateway=
+-
+-### Option: JavaGatewayPort
+-#	Port that Zabbix Java gateway listens on.
+-#
+-# Mandatory: no
+-# Range: 1024-32767
+-# Default:
+-# JavaGatewayPort=10052
+-
+-### Option: StartJavaPollers
+-#	Number of pre-forked instances of Java pollers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartJavaPollers=0
+-
+-### Option: StartVMwareCollectors
+-#	Number of pre-forked vmware collector instances.
+-#
+-# Mandatory: no
+-# Range: 0-250
+-# Default:
+-# StartVMwareCollectors=0
+-
+-### Option: VMwareFrequency
+-#	How often Zabbix will connect to VMware service to obtain a new data.
+-#
+-# Mandatory: no
+-# Range: 10-86400
+-# Default:
+-# VMwareFrequency=60
+-
+-### Option: VMwarePerfFrequency
+-#	How often Zabbix will connect to VMware service to obtain performance data.
+-#
+-# Mandatory: no
+-# Range: 10-86400
+-# Default:
+-# VMwarePerfFrequency=60
+-
+-### Option: VMwareCacheSize
+-#	Size of VMware cache, in bytes.
+-#	Shared memory size for storing VMware data.
+-#	Only used if VMware collectors are started.
+-#
+-# Mandatory: no
+-# Range: 256K-2G
+-# Default:
+-# VMwareCacheSize=8M
+-
+-### Option: VMwareTimeout
+-#	Specifies how many seconds vmware collector waits for response from VMware service.
+-#
+-# Mandatory: no
+-# Range: 1-300
+-# Default:
+-# VMwareTimeout=10
+-
+-### Option: SNMPTrapperFile
+-#	Temporary file used for passing data from SNMP trap daemon to the server.
+-#	Must be the same as in zabbix_trap_receiver.pl or SNMPTT configuration file.
+-#
+-# Mandatory: no
+-# Default:
+-# SNMPTrapperFile=/tmp/zabbix_traps.tmp
+-SNMPTrapperFile=/var/lib/zabbix/snmptraps/snmptraps.log
+-
+-### Option: StartSNMPTrapper
+-#	If 1, SNMP trapper process is started.
+-#
+-# Mandatory: no
+-# Range: 0-1
+-# Default:
+-# StartSNMPTrapper=0
+-StartSNMPTrapper=1
+-
+-### Option: ListenIP
+-#	List of comma delimited IP addresses that the trapper should listen on.
+-#	Trapper will listen on all network interfaces if this parameter is missing.
+-#
+-# Mandatory: no
+-# Default:
+-# ListenIP=0.0.0.0
+-
+-### Option: HousekeepingFrequency
+-#	How often Zabbix will perform housekeeping procedure (in hours).
+-#	Housekeeping is removing outdated information from the database.
+-#	To prevent Housekeeper from being overloaded, no more than 4 times HousekeepingFrequency
+-#	hours of outdated information are deleted in one housekeeping cycle, for each item.
+-#	To lower load on server startup housekeeping is postponed for 30 minutes after server start.
+-#	With HousekeepingFrequency=0 the housekeeper can be only executed using the runtime control option.
+-#	In this case the period of outdated information deleted in one housekeeping cycle is 4 times the
+-#	period since the last housekeeping cycle, but not less than 4 hours and not greater than 4 days.
+-#
+-# Mandatory: no
+-# Range: 0-24
+-# Default:
+-# HousekeepingFrequency=1
+-
+-### Option: MaxHousekeeperDelete
+-#	The table "housekeeper" contains "tasks" for housekeeping procedure in the format:
+-#	[housekeeperid], [tablename], [field], [value].
+-#	No more than 'MaxHousekeeperDelete' rows (corresponding to [tablename], [field], [value])
+-#	will be deleted per one task in one housekeeping cycle.
+-#	If set to 0 then no limit is used at all. In this case you must know what you are doing!
+-#
+-# Mandatory: no
+-# Range: 0-1000000
+-# Default:
+-# MaxHousekeeperDelete=5000
+-
+-### Option: CacheSize
+-#	Size of configuration cache, in bytes.
+-#	Shared memory size for storing host, item and trigger data.
+-#
+-# Mandatory: no
+-# Range: 128K-64G
+-# Default:
+-# CacheSize=32M
+-
+-### Option: CacheUpdateFrequency
+-#	How often Zabbix will perform update of configuration cache, in seconds.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# CacheUpdateFrequency=10
+-
+-### Option: StartDBSyncers
+-#	Number of pre-forked instances of DB Syncers.
+-#
+-# Mandatory: no
+-# Range: 1-100
+-# Default:
+-# StartDBSyncers=4
+-
+-### Option: HistoryCacheSize
+-#	Size of history cache, in bytes.
+-#	Shared memory size for storing history data.
+-#
+-# Mandatory: no
+-# Range: 128K-2G
+-# Default:
+-# HistoryCacheSize=16M
+-
+-### Option: HistoryIndexCacheSize
+-#	Size of history index cache, in bytes.
+-#	Shared memory size for indexing history cache.
+-#
+-# Mandatory: no
+-# Range: 128K-2G
+-# Default:
+-# HistoryIndexCacheSize=4M
+-
+-### Option: TrendCacheSize
+-#	Size of trend write cache, in bytes.
+-#	Shared memory size for storing trends data.
+-#
+-# Mandatory: no
+-# Range: 128K-2G
+-# Default:
+-# TrendCacheSize=4M
+-
+-### Option: TrendFunctionCacheSize
+-#	Size of trend function cache, in bytes.
+-#	Shared memory size for caching calculated trend function data.
+-#
+-# Mandatory: no
+-# Range: 128K-2G
+-# Default:
+-# TrendFunctionCacheSize=4M
+-
+-### Option: ValueCacheSize
+-#	Size of history value cache, in bytes.
+-#	Shared memory size for caching item history data requests.
+-#	Setting to 0 disables value cache.
+-#
+-# Mandatory: no
+-# Range: 0,128K-64G
+-# Default:
+-# ValueCacheSize=8M
+-
+-### Option: Timeout
+-#	Specifies timeout for communications (in seconds).
+-#
+-# Mandatory: no
+-# Range: 1-30
+-# Default:
+-# Timeout=3
+-
+-
+-### Option: TrapperTimeout
+-#	Specifies how many seconds trapper may spend processing new data.
+-#
+-# Mandatory: no
+-# Range: 1-300
+-# Default:
+-# TrapperTimeout=300
+-
+-### Option: UnreachablePeriod
+-#	After how many seconds of unreachability treat a host as unavailable.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# UnreachablePeriod=45
+-
+-### Option: UnavailableDelay
+-#	How often host is checked for availability during the unavailability period, in seconds.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# UnavailableDelay=60
+-
+-### Option: UnreachableDelay
+-#	How often host is checked for availability during the unreachability period, in seconds.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# UnreachableDelay=15
+-
+-### Option: AlertScriptsPath
+-#	Full path to location of custom alert scripts.
+-#	Default depends on compilation options.
+-#	To see the default path run command "zabbix_server --help".
+-#
+-# Mandatory: no
+-# Default:
+-# AlertScriptsPath=${datadir}/zabbix/alertscripts
+-AlertScriptsPath=/usr/lib/zabbix/alertscripts
+-
+-### Option: ExternalScripts
+-#	Full path to location of external scripts.
+-#	Default depends on compilation options.
+-#	To see the default path run command "zabbix_server --help".
+-#
+-# Mandatory: no
+-# Default:
+-# ExternalScripts=${datadir}/zabbix/externalscripts
+-ExternalScripts=/usr/lib/zabbix/externalscripts
+-
+-### Option: FpingLocation
+-#	Location of fping.
+-#	Make sure that fping binary has root ownership and SUID flag set.
+-#
+-# Mandatory: no
+-# Default:
+-# FpingLocation=/usr/sbin/fping
+-FpingLocation=/usr/bin/fping
+-
+-### Option: Fping6Location
+-#	Location of fping6.
+-#	Make sure that fping6 binary has root ownership and SUID flag set.
+-#	Make empty if your fping utility is capable to process IPv6 addresses.
+-#
+-# Mandatory: no
+-# Default:
+-# Fping6Location=/usr/sbin/fping6
+-
+-### Option: SSHKeyLocation
+-#	Location of public and private keys for SSH checks and actions.
+-#
+-# Mandatory: no
+-# Default:
+-# SSHKeyLocation=
+-SSHKeyLocation=/var/lib/zabbix/ssh_keys
+-
+-### Option: LogSlowQueries
+-#	How long a database query may take before being logged (in milliseconds).
+-#	Only works if DebugLevel set to 3, 4 or 5.
+-#	0 - don't log slow queries.
+-#
+-# Mandatory: no
+-# Range: 1-3600000
+-# Default:
+-# LogSlowQueries=0
+-
+-
+-### Option: TmpDir
+-#	Temporary directory.
+-#
+-# Mandatory: no
+-# Default:
+-# TmpDir=/tmp
+-
+-### Option: StartProxyPollers
+-#	Number of pre-forked instances of pollers for passive proxies.
+-#
+-# Mandatory: no
+-# Range: 0-250
+-# Default:
+-# StartProxyPollers=1
+-
+-### Option: ProxyConfigFrequency
+-#	How often Zabbix Server sends configuration data to a Zabbix Proxy in seconds.
+-#	This parameter is used only for proxies in the passive mode.
+-#
+-# Mandatory: no
+-# Range: 1-3600*24*7
+-# Default:
+-# ProxyConfigFrequency=10
+-
+-### Option: ProxyDataFrequency
+-#	How often Zabbix Server requests history data from a Zabbix Proxy in seconds.
+-#	This parameter is used only for proxies in the passive mode.
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# ProxyDataFrequency=1
+-
+-### Option: StartLLDProcessors
+-#	Number of pre-forked instances of low level discovery processors.
+-#
+-# Mandatory: no
+-# Range: 1-100
+-# Default:
+-# StartLLDProcessors=2
+-
+-### Option: AllowRoot
+-#	Allow the server to run as 'root'. If disabled and the server is started by 'root', the server
+-#	will try to switch to the user specified by the User configuration option instead.
+-#	Has no effect if started under a regular user.
+-#	0 - do not allow
+-#	1 - allow
+-#
+-# Mandatory: no
+-# Default:
+-# AllowRoot=0
+-
+-### Option: User
+-#	Drop privileges to a specific, existing user on the system.
+-#	Only has effect if run as 'root' and AllowRoot is disabled.
+-#
+-# Mandatory: no
+-# Default:
+-# User=zabbix
+-User=zabbix
+-
+-### Option: Include
+-#	You may include individual files or all files in a directory in the configuration file.
+-#	Installing Zabbix will create include directory in /usr/local/etc, unless modified during the compile time.
+-#
+-# Mandatory: no
+-# Default:
+-# Include=
+-
+-# Include=/usr/local/etc/zabbix_server.general.conf
+-# Include=/usr/local/etc/zabbix_server.conf.d/
+-# Include=/usr/local/etc/zabbix_server.conf.d/*.conf
+-
+-### Option: SSLCertLocation
+-#	Location of SSL client certificates.
+-#	This parameter is used in web monitoring and for communication with Vault.
+-#	Default depends on compilation options.
+-#	To see the default path run command "zabbix_server --help".
+-#
+-# Mandatory: no
+-# Default:
+-# SSLCertLocation=${datadir}/zabbix/ssl/certs
+-SSLCertLocation=/var/lib/zabbix/ssl/certs/
+-
+-### Option: SSLKeyLocation
+-#	Location of private keys for SSL client certificates.
+-#	This parameter is used in web monitoring and for communication with Vault.
+-#	Default depends on compilation options.
+-#	To see the default path run command "zabbix_server --help".
+-#
+-# Mandatory: no
+-# Default:
+-# SSLKeyLocation=${datadir}/zabbix/ssl/keys
+-SSLKeyLocation=/var/lib/zabbix/ssl/keys/
+-
+-### Option: SSLCALocation
+-#	Override the location of certificate authority (CA) files for SSL server certificate verification.
+-#	If not set, system-wide directory will be used.
+-#	This parameter is used in web monitoring, SMTP authentication, HTTP agent items and for communication with Vault.
+-#
+-# Mandatory: no
+-# Default:
+-# SSLCALocation=
+-SSLCALocation=/var/lib/zabbix/ssl/ssl_ca/
+-
+-### Option: StatsAllowedIP
+-#	List of comma delimited IP addresses, optionally in CIDR notation, or DNS names of external Zabbix instances.
+-#	Stats request will be accepted only from the addresses listed here. If this parameter is not set no stats requests
+-#	will be accepted.
+-#	If IPv6 support is enabled then '127.0.0.1', '::127.0.0.1', '::ffff:127.0.0.1' are treated equally
+-#	and '::/0' will allow any IPv4 or IPv6 address.
+-#	'0.0.0.0/0' can be used to allow any IPv4 address.
+-#	Example: StatsAllowedIP=127.0.0.1,192.168.1.0/24,::1,2001:db8::/32,zabbix.example.com
+-#
+-# Mandatory: no
+-# Default:
+-# StatsAllowedIP=
+-
+-####### LOADABLE MODULES #######
+-
+-### Option: LoadModulePath
+-#	Full path to location of server modules.
+-#	Default depends on compilation options.
+-#	To see the default path run command "zabbix_server --help".
+-#
+-# Mandatory: no
+-# Default:
+-# LoadModulePath=${libdir}/modules
+-LoadModulePath=/var/lib/zabbix/modules/
+-
+-### Option: LoadModule
+-#	Module to load at server startup. Modules are used to extend functionality of the server.
+-#	Formats:
+-#		LoadModule=<module.so>
+-#		LoadModule=<path/module.so>
+-#		LoadModule=</abs_path/module.so>
+-#	Either the module must be located in directory specified by LoadModulePath or the path must precede the module name.
+-#	If the preceding path is absolute (starts with '/') then LoadModulePath is ignored.
+-#	It is allowed to include multiple LoadModule parameters.
+-#
+-# Mandatory: no
+-# Default:
+-# LoadModule=
+-
+-####### TLS-RELATED PARAMETERS #######
+-
+-### Option: TLSCAFile
+-#	Full pathname of a file containing the top-level CA(s) certificates for
+-#	peer certificate verification.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCAFile=
+-
+-### Option: TLSCRLFile
+-#	Full pathname of a file containing revoked certificates.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCRLFile=
+-
+-### Option: TLSCertFile
+-#	Full pathname of a file containing the server certificate or certificate chain.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCertFile=
+-
+-### Option: TLSKeyFile
+-#	Full pathname of a file containing the server private key.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSKeyFile=
+-
+-####### For advanced users - TLS ciphersuite selection criteria #######
+-
+-### Option: TLSCipherCert13
+-#	Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#	Override the default ciphersuite selection criteria for certificate-based encryption.
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherCert13=
+-
+-### Option: TLSCipherCert
+-#	GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#	Override the default ciphersuite selection criteria for certificate-based encryption.
+-#	Example for GnuTLS:
+-#		NONE:+VERS-TLS1.2:+ECDHE-RSA:+RSA:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL:+CTYPE-X.509
+-#	Example for OpenSSL:
+-#		EECDH+aRSA+AES128:RSA+aRSA+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherCert=
+-
+-### Option: TLSCipherPSK13
+-#	Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#	Override the default ciphersuite selection criteria for PSK-based encryption.
+-#	Example:
+-#		TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherPSK13=
+-
+-### Option: TLSCipherPSK
+-#	GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#	Override the default ciphersuite selection criteria for PSK-based encryption.
+-#	Example for GnuTLS:
+-#		NONE:+VERS-TLS1.2:+ECDHE-PSK:+PSK:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL
+-#	Example for OpenSSL:
+-#		kECDHEPSK+AES128:kPSK+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherPSK=
+-
+-### Option: TLSCipherAll13
+-#	Cipher string for OpenSSL 1.1.1 or newer in TLS 1.3.
+-#	Override the default ciphersuite selection criteria for certificate- and PSK-based encryption.
+-#	Example:
+-#		TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherAll13=
+-
+-### Option: TLSCipherAll
+-#	GnuTLS priority string or OpenSSL (TLS 1.2) cipher string.
+-#	Override the default ciphersuite selection criteria for certificate- and PSK-based encryption.
+-#	Example for GnuTLS:
+-#		NONE:+VERS-TLS1.2:+ECDHE-RSA:+RSA:+ECDHE-PSK:+PSK:+AES-128-GCM:+AES-128-CBC:+AEAD:+SHA256:+SHA1:+CURVE-ALL:+COMP-NULL:+SIGN-ALL:+CTYPE-X.509
+-#	Example for OpenSSL:
+-#		EECDH+aRSA+AES128:RSA+aRSA+AES128:kECDHEPSK+AES128:kPSK+AES128
+-#
+-# Mandatory: no
+-# Default:
+-# TLSCipherAll=
+-
+-### Option: DBTLSConnect
+-#	Setting this option enforces to use TLS connection to database.
+-#	required    - connect using TLS
+-#	verify_ca   - connect using TLS and verify certificate
+-#	verify_full - connect using TLS, verify certificate and verify that database identity specified by DBHost
+-#	              matches its certificate
+-#	On MySQL starting from 5.7.11 and PostgreSQL following values are supported: "required", "verify_ca" and
+-#	"verify_full".
+-#	On MariaDB starting from version 10.2.6 "required" and "verify_full" values are supported.
+-#	Default is not to set any option and behavior depends on database configuration
+-#
+-# Mandatory: no
+-# Default:
+-# DBTLSConnect=
+-
+-### Option: DBTLSCAFile
+-#	Full pathname of a file containing the top-level CA(s) certificates for database certificate verification.
+-#	Supported only for MySQL and PostgreSQL
+-#
+-# Mandatory: no
+-#	(yes, if DBTLSConnect set to one of: verify_ca, verify_full)
+-# Default:
+-# DBTLSCAFile=
+-
+-### Option: DBTLSCertFile
+-#	Full pathname of file containing Zabbix server certificate for authenticating to database.
+-#	Supported only for MySQL and PostgreSQL
+-#
+-# Mandatory: no
+-# Default:
+-# DBTLSCertFile=
+-
+-### Option: DBTLSKeyFile
+-#	Full pathname of file containing the private key for authenticating to database.
+-#	Supported only for MySQL and PostgreSQL
+-#
+-# Mandatory: no
+-# Default:
+-# DBTLSKeyFile=
+-
+-### Option: DBTLSCipher
+-#	The list of encryption ciphers that Zabbix server permits for TLS protocols up through TLSv1.2
+-#	Supported only for MySQL
+-#
+-# Mandatory no
+-# Default:
+-# DBTLSCipher=
+-
+-### Option: DBTLSCipher13
+-#	The list of encryption ciphersuites that Zabbix server permits for TLSv1.3 protocol
+-#	Supported only for MySQL, starting from version 8.0.16
+-#
+-# Mandatory no
+-# Default:
+-# DBTLSCipher13=
+-
+-### Option: Vault
+-#	Specifies vault:
+-#		HashiCorp - HashiCorp KV Secrets Engine - Version 2
+-#		CyberArk  - CyberArk Central Credential Provider
+-#
+-# Mandatory: no
+-# Default:
+-# Vault=HashiCorp
+-
+-### Option: VaultToken
+-#	Vault authentication token that should have been generated exclusively for Zabbix server with read only permission
+-#	to paths specified in Vault macros and read only permission to path specified in optional VaultDBPath
+-#	configuration parameter.
+-#	It is an error if VaultToken and VAULT_TOKEN environment variable are defined at the same time.
+-#
+-# Mandatory: no
+-#	(yes, if Vault is explicitly set to HashiCorp)
+-# Default:
+-# VaultToken=
+-
+-### Option: VaultURL
+-#	Vault server HTTP[S] URL. System-wide CA certificates directory will be used if SSLCALocation is not specified.
+-#
+-# Mandatory: no
+-# Default:
+-# VaultURL=https://127.0.0.1:8200
+-
+-### Option: VaultPrefix
+-#	Custom prefix for Vault path or query depending on the Vault.
+-#	Most suitable defaults will be used if not specified.
+-#	Note that 'data' is automatically appended after mountpoint for HashiCorp if VaultPrefix is not specified.
+-#	Example prefix for HashiCorp:
+-#		/v1/secret/data/
+-#	Example prefix for CyberArk:
+-#		/AIMWebService/api/Accounts?
+-# Mandatory: no
+-# Default:
+-# VaultPrefix=
+-
+-### Option: VaultDBPath
+-#	Vault path or query depending on the Vault from where credentials for database will be retrieved by keys.
+-#	Keys used for HashiCorp are 'password' and 'username'.
+-#	Example path:
+-#		secret/zabbix/database
+-#	Keys used for CyberArk are 'Content' and 'UserName'.
+-#	Example query:
+-#		AppID=zabbix_server&Query=Safe=passwordSafe;Object=zabbix_server_database
+-#	This option can only be used if DBUser and DBPassword are not specified.
+-#
+-# Mandatory: no
+-# Default:
+-# VaultDBPath=
+-
+-### Option: VaultTLSCertFile
+-#	Name of the SSL certificate file used for client authentication. The certificate file must be in PEM1 format.
+-#	If the certificate file contains also the private key, leave the SSL key file field empty. The directory
+-#	containing this file is specified by configuration parameter SSLCertLocation.
+-#
+-# Mandatory: no
+-# Default:
+-# VaultTLSCertFile=
+-
+-### Option: VaultTLSKeyFile
+-#	Name of the SSL private key file used for client authentication. The private key file must be in PEM1 format.
+-#	The directory containing this file is specified by configuration parameter SSLKeyLocation.
+-#
+-# Mandatory: no
+-# Default:
+-# VaultTLSKeyFile=
+-
+-### Option: StartReportWriters
+-#	Number of pre-forked report writer instances.
+-#
+-# Mandatory: no
+-# Range: 0-100
+-# Default:
+-# StartReportWriters=0
+-
+-### Option: WebServiceURL
+-#	URL to Zabbix web service, used to perform web related tasks.
+-#	Example: http://localhost:10053/report
+-#
+-# Mandatory: no
+-# Default:
+-# WebServiceURL=
+-WebServiceURL=http://zabbix-web-service:10053/report
+-
+-### Option: ServiceManagerSyncFrequency
+-#	How often Zabbix will synchronize configuration of a service manager (in seconds).
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# ServiceManagerSyncFrequency=60
+-
+-### Option: ProblemHousekeepingFrequency
+-#	How often Zabbix will delete problems for deleted triggers (in seconds).
+-#
+-# Mandatory: no
+-# Range: 1-3600
+-# Default:
+-# ProblemHousekeepingFrequency=60
+-
+-## Option: StartODBCPollers
+-#	Number of pre-forked ODBC poller instances.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartODBCPollers=1
+-
+-### Option: EnableGlobalScripts
+-#    Enable global scripts on Zabbix server.
+-#       0 - disable
+-#       1 - enable
+-#
+-# Mandatory: no
+-# Default:
+-# EnableGlobalScripts=1
+-
+-# Option: AllowSoftwareUpdateCheck
+-#       Allow Zabbix UI to receive information about software updates from zabbix.com
+-#       0 - disable software update checks
+-#       1 - enable software update checks
+-#
+-# Mandatory: no
+-# Default:
+-# AllowSoftwareUpdateCheck=1
+-
+-### Option: SMSDevices
+-#	List of comma delimited modem files allowed to use Zabbix server
+-#       SMS sending not possible if this parameter is not set
+-#	Example: SMSDevices=/dev/ttyUSB0,/dev/ttyUSB1
+-#
+-# Mandatory: no
+-# Default:
+-# SMSDevices=
+-
+-####### For advanced users - TCP-related fine-tuning parameters #######
+-
+-## Option: ListenBacklog
+-#       The maximum number of pending connections in the queue. This parameter is passed to
+-#       listen() function as argument 'backlog' (see "man listen").
+-#
+-# Mandatory: no
+-# Range: 0 - INT_MAX (depends on system, too large values may be silently truncated to implementation-specified maximum)
+-# Default: SOMAXCONN (hard-coded constant, depends on system)
+-# ListenBacklog=
+-
+-
+-####### High availability cluster parameters #######
+-
+-## Option: HANodeName
+-#	The high availability cluster node name.
+-#	When empty, server is working in standalone mode; a node with empty name is registered with address for the frontend to connect to.
+-#
+-# Mandatory: no
+-# Default:
+-# HANodeName=
+-
+-## Option: NodeAddress
+-#	IP or hostname with optional port to specify how frontend should connect to the server.
+-#	Format: <address>[:<port>]
+-#
+-#	If IP or hostname is not set, then ListenIP value will be used. In case ListenIP is not set, localhost will be used.
+-#	If port is not set, then ListenPort value will be used. In case ListenPort is not set, 10051 will be used.
+-#	This option can be overridden by address specified in frontend configuration.
+-#
+-# Mandatory: no
+-# Default:
+-# NodeAddress=localhost:10051
+-
+-####### Browser monitoring #######
+-
+-### Option: WebDriverURL
+-#	WebDriver interface HTTP[S] URL. For example http://localhost:4444 used with Selenium WebDriver standalone server.
+-#
+-# Mandatory: no
+-# Default:
+-# WebDriverURL=
+-
+-### Option: StartBrowserPollers
+-#	Number of pre-forked instances of browser item pollers.
+-#
+-# Mandatory: no
+-# Range: 0-1000
+-# Default:
+-# StartBrowserPollers=1
+diff --git a/Dockerfiles/zabbix-web/Dockerfile b/Dockerfiles/zabbix-web/Dockerfile
+deleted file mode 100644
+index 4890e7e..0000000
+--- a/Dockerfiles/zabbix-web/Dockerfile
++++ /dev/null
+@@ -1,3 +0,0 @@
+-FROM zabbix/zabbix-web-nginx-pgsql:latest
+-
+-EXPOSE 8080
+\ No newline at end of file
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 303a154..8ba9aea 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -1,21 +1,25 @@
+ services:
+   zabbix-database:
+-    image: postgres:15
++    image: mysql:8.3.0
+     container_name: zabbix-database
+     environment:
+-      POSTGRES_USER: zabbix
+-      POSTGRES_PASSWORD: zabbix_password
+-      POSTGRES_DB: zabbix
+-    volumes:
+-      - zabbix-database:/var/lib/postgresql/data
++      MYSQL_ROOT_PASSWORD: "asdfasdfasdfasdf"
++      MYSQL_DATABASE: zabbix
+     ports:
+-      - "5432:5432"
++      - 3306:3306
++    volumes:
++      - zabbix-database:/var/lib/mysql
++      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
++    deploy:
++      resources:
++        limits:
++          memory: 1024M
+     restart: unless-stopped
+     networks:
+       - zabbix
+ 
+   zabbix-snmptraps:
+-    image: zabbix/zabbix-snmptraps:latest
++    image: zabbix/zabbix-snmptraps:alpine-7.0-latest
+     container_name: zabbix-snmptraps
+     environment:
+       ZBX_ENABLE_SNMP_TRAPS: "true"
+@@ -30,15 +34,14 @@ services:
+       - zabbix
+ 
+   zabbix-server:
+-    build:
+-      context: ./Dockerfiles/zabbix-server
+-      dockerfile: Dockerfile
++    image: zabbix/zabbix-server-mysql:alpine-7.0-latest
+     container_name: zabbix-server
+     environment:
+-      DB_SERVER_HOST: pgsql.hcode.com.br
+-      POSTGRES_USER: hcode
+-      POSTGRES_PASSWORD: tu:7~}UC42VG
+-      POSTGRES_DB: zabbix
++      DB_SERVER_HOST: zabbix-database
++      DB_SERVER_PORT: 3306
++      MYSQL_DATABASE: zabbix
++      MYSQL_USER: root
++      MYSQL_PASSWORD: "asdfasdfasdfasdf"
+     volumes:
+       - zabbix-server:/var/lib/zabbix
+       - zabbix-server:/var/lib/zabbix/export
+@@ -52,16 +55,17 @@ services:
+       - zabbix
+ 
+   zabbix-web:
+-    build:
+-      context: ./Dockerfiles/zabbix-web
+-      dockerfile: Dockerfile
++    image: zabbix/zabbix-web-nginx-mysql:alpine-7.0-latest
+     container_name: zabbix-web
+     environment:
+-      DB_SERVER_HOST: pgsql.hcode.com.br
+-      POSTGRES_USER: hcode
+-      POSTGRES_PASSWORD: tu:7~}UC42VG
+-      POSTGRES_DB: zabbix
+       ZBX_SERVER_HOST: zabbix-server
++      ZBX_SERVER_NAME: zabbix-server
++      ZBX_SERVER_PORT: 10051
++      DB_SERVER_HOST: zabbix-database
++      DB_SERVER_PORT: 3306
++      MYSQL_DATABASE: zabbix
++      MYSQL_USER: root
++      MYSQL_PASSWORD: "asdfasdfasdfasdf"
+       PHP_TZ: "America/Sao_Paulo"
+     volumes:
+       - zabbix-web:/var/lib/zabbix-web
+@@ -74,12 +78,9 @@ services:
+     restart: unless-stopped
+ 
+   zabbix-agent:
+-    build:
+-      context: ./Dockerfiles/zabbix-agent
+-      dockerfile: Dockerfile
++    image: zabbix/zabbix-agent:alpine-7.0-latest
+     container_name: zabbix-agent
+     environment:
+-      ZBX_HOSTNAME: "zabbix-agent"
+       ZBX_SERVER_HOST: "zabbix-server"
+     ports:
+       - "10050:10050"
+@@ -117,6 +118,7 @@ services:
+ 
+ networks:
+   zabbix:
++    driver: bridge
+ 
+ volumes:
+   zabbix-database:

@@ -1,21 +1,25 @@
 services:
   zabbix-database:
-    image: postgres:15
+    image: mysql:8.3.0
     container_name: zabbix-database
     environment:
-      POSTGRES_USER: zabbix
-      POSTGRES_PASSWORD: zabbix_password
-      POSTGRES_DB: zabbix
-    volumes:
-      - zabbix-database:/var/lib/postgresql/data
+      MYSQL_ROOT_PASSWORD: "asdfasdfasdfasdf"
+      MYSQL_DATABASE: zabbix
     ports:
-      - "5432:5432"
+      - 3306:3306
+    volumes:
+      - zabbix-database:/var/lib/mysql
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
     restart: unless-stopped
     networks:
       - zabbix
 
   zabbix-snmptraps:
-    image: zabbix/zabbix-snmptraps:latest
+    image: zabbix/zabbix-snmptraps:alpine-7.0-latest
     container_name: zabbix-snmptraps
     environment:
       ZBX_ENABLE_SNMP_TRAPS: "true"
@@ -30,15 +34,14 @@ services:
       - zabbix
 
   zabbix-server:
-    build:
-      context: ./Dockerfiles/zabbix-server
-      dockerfile: Dockerfile
+    image: zabbix/zabbix-server-mysql:alpine-7.0-latest
     container_name: zabbix-server
     environment:
-      DB_SERVER_HOST: pgsql.hcode.com.br
-      POSTGRES_USER: hcode
-      POSTGRES_PASSWORD: tu:7~}UC42VG
-      POSTGRES_DB: zabbix
+      DB_SERVER_HOST: zabbix-database
+      DB_SERVER_PORT: 3306
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: root
+      MYSQL_PASSWORD: "asdfasdfasdfasdf"
     volumes:
       - zabbix-server:/var/lib/zabbix
       - zabbix-server:/var/lib/zabbix/export
@@ -52,16 +55,17 @@ services:
       - zabbix
 
   zabbix-web:
-    build:
-      context: ./Dockerfiles/zabbix-web
-      dockerfile: Dockerfile
+    image: zabbix/zabbix-web-nginx-mysql:alpine-7.0-latest
     container_name: zabbix-web
     environment:
-      DB_SERVER_HOST: pgsql.hcode.com.br
-      POSTGRES_USER: hcode
-      POSTGRES_PASSWORD: tu:7~}UC42VG
-      POSTGRES_DB: zabbix
       ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_NAME: zabbix-server
+      ZBX_SERVER_PORT: 10051
+      DB_SERVER_HOST: zabbix-database
+      DB_SERVER_PORT: 3306
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: root
+      MYSQL_PASSWORD: "asdfasdfasdfasdf"
       PHP_TZ: "America/Sao_Paulo"
     volumes:
       - zabbix-web:/var/lib/zabbix-web
@@ -74,12 +78,9 @@ services:
     restart: unless-stopped
 
   zabbix-agent:
-    build:
-      context: ./Dockerfiles/zabbix-agent
-      dockerfile: Dockerfile
+    image: zabbix/zabbix-agent:alpine-7.0-latest
     container_name: zabbix-agent
     environment:
-      ZBX_HOSTNAME: "zabbix-agent"
       ZBX_SERVER_HOST: "zabbix-server"
     ports:
       - "10050:10050"
@@ -117,6 +118,7 @@ services:
 
 networks:
   zabbix:
+    driver: bridge
 
 volumes:
   zabbix-database:
